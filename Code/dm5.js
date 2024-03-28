@@ -27,17 +27,40 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
     locale: "en-US",
     ttsDefaultVoice: "en-US-DavisNeural",
   };
- 
+
+  // const meeting_name = {
+
+  //   meeting : "meeting",
+  //   departmentalmeeting : "departmental meeting",
+  //   "virtual meeting": "virtual meeting"
+
+
+  //  };
+  const grammar_day = {
+    monday: { day: "Monday" },
+    tuesday: { day: "Tuesday" },
+    wednesday: { day: "Wednesday" },
+    thursday: { day: "Thursday" },
+    friday: { day: "Friday" },
+  };
   function getThreshold(thre) {
     return thre > 0.85;
   }
   function whoIntent(event) {
     return event === "who is adam lambert";
   }
+  function helpIntent(event) {
+    return event === "help" || "Help";
+  }
   function meetIntent(event) {
     return event === "create a meeting";
   }
-
+  function isInDayGrammar(event) {
+    return event.toLowerCase() in grammar_day;  }
+  function isInTittleGrammar(event) {
+    return ((event.toLowerCase() === "virtual meeting")||(event.toLowerCase() === "special meeting")||(event.toLowerCase() === "meeting"));  
+  }
+  
   /*
   The ASR threshold is the event.value[0].confidence. So we can use the similar function like getASRThreshold(event.value[0].confidence)
   to judge the correction. We can use both of event.nluValue.intents[0].confidenceScore and event.value[0].confidence
@@ -117,6 +140,10 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
               RECOGNISED: 
                 [
                 {
+                    guard: ({ event }) => event.nluValue.topIntent === "None",
+                    target: "#DM.NotQGrammar",
+                },
+                {
                   guard: (({event}) => meetIntent(event.nluValue.topIntent) && getThreshold (event.nluValue.intents[0].confidenceScore)),
                   target: "#DM.WhichDate",    
                 },
@@ -132,10 +159,10 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
                   guard: (({event}) => whoIntent(event.nluValue.topIntent) && !!(getThreshold (event.nluValue.intents[0].confidenceScore))),
                   target: "#DM.WhoisAdam",
                 },
-                {
-                  guard: ({ event }) => event.nluValue.topIntent === "help" || "Help",
-                  target: "#DM.HelpQ",
-                },
+                // {
+                //   guard: ({ event }) => event.nluValue.topIntent === "Help",
+                //   target: "#DM.HelpQ",
+                // },
                 "#DM.NotQGrammar",
 
                 ],
@@ -228,16 +255,21 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
                 RECOGNISED: 
                   [
                   {
-                    guard: ({ event }) => event.nluValue.entities[0].text == "Monday" || "Tuesday" || "Wednesday" || "Thursday" || "Friday",
+                    guard: ({ event }) => isInDayGrammar(event.value[0].utterance) === false,
+                    target: "#DM.NotWhichDateGrammar",
+                  },
+                  {
+                    guard: ({ event }) => isInDayGrammar(event.nluValue.entities[0].text) === true,
                     actions: [
                       ({ context, event }) => { context.weekdate = event.nluValue.entities[0].text},
                     ],
                     target: "#DM.MeetingTitle",    
-                  },
+                  },                
                   {
-                    guard: ({ event }) => event.nluValue.topIntent == "help" ,
+                    guard: ({ event }) => event.nluValue.entities[0].text === "Help" || "help",
                     target: "#DM.HelpWhichDate",
                   },
+                
                   "#DM.NotWhichDateGrammar",
                   ],
                 ASR_NOINPUT:[{
@@ -270,7 +302,7 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
         initial: "notWhichDateGrammar",
         states: {
           notWhichDateGrammar: {
-            entry: [{type: "say", params:`Sorry, I didn't understand. What's your question?, please say from Monday to Friday`}],
+            entry: [{type: "say", params:`Sorry, I didn't understand. please say from Monday to Friday`}],
             on: {    
               SPEAK_COMPLETE: "#DM.WhichDate"
               },
@@ -290,7 +322,7 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
         },
       },      
       /* Meeting Title */
-      //Answer e.g. "departmental meeting" || "meeting" || "virtual meeting"
+      //Answer e.g. "special meeting" || "meeting" || "virtual meeting"
       MeetingTitle: {
         initial: "meetingTitle",
         states: {
@@ -306,8 +338,12 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
                 RECOGNISED: 
                   [
                   {
-                    //Answer e.g. "departmental meeting" || "meeting" || "virtual meeting"
-                    guard: ({ event }) => event.nluValue.entities[0].text == "departmental meeting" || "meeting" || "virtual meeting",
+                    guard: ({ event }) => isInTittleGrammar(event.value[0].utterance) === false,
+                    target: "#DM.NotMeetingTitleGrammar",
+                  },
+                  {
+                    //Answer e.g. "special meeting" || "meeting" || "virtual meeting"
+                    guard: ({ event }) => isInTittleGrammar(event.nluValue.entities[0].text) === true,
                     actions: [
                       ({ context, event }) => { context.meeting_name = event.nluValue.entities[0].text},
                     ],
@@ -317,7 +353,7 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
                     guard: ({ event }) => event.nluValue.topIntent == "help" ,
                     target: "#DM.HelpMeetingTitle",
                   },
-                  "#DM.NotMeetingTitleGrammar"
+                  "#DM.NotMeetingTitleGrammar",
                   ],
                 ASR_NOINPUT:[{
                     guard: ({context}) => context.count >= 3,
@@ -346,10 +382,10 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
       }, 
       /* Not in grammar */
       NotMeetingTitleGrammar: {
-        initial: "notMeetingTitleGrammar",
+        initial: "nogrammar",
         states: {
-           notMeetingTitleGrammar: {
-            entry: [{type: "say", params:`Sorry, I didn't understand. What's your question?, please say departmental meeting or meeting or virtual meeting`}],
+          nogrammar: {
+            entry: [{type: "say", params:`Sorry, I didn't understand. please say departmental meeting or meeting or virtual meeting`}],
             on: { 
               SPEAK_COMPLETE: "#DM.MeetingTitle"
               },
@@ -370,9 +406,9 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
       },    
       /* Repeat the Info of the Meeting */
       MeetingInfo: {
-        initial: "adamInfo",
+        initial: "meetingInfo",
         states: {
-            adamInfo: {
+          meetingInfo: {
             entry: [{type: "say", params: ({context}) => `The meeting is on ${context.weekdate} and the meeting title is ${context.meeting_name} `}],
             on: {            
               SPEAK_COMPLETE: "#DM.Done"
@@ -382,7 +418,7 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
       },
 
       /* Who is Adam Lambert */
-      //Answer e.g. Adam Lambert is 42 years old
+      //Answer e.g. 42 years old
       WhoisAdam: {
         initial: "whoisAdam",
         states: {
@@ -397,9 +433,14 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
               on: { 
                 RECOGNISED: 
                   [
+                    {
+                      //e.g. Adam Lambert is 42 years old
+                      guard: ({ event }) => whoIntent(event.nluValue.topIntent) === false ,
+                      target: "#DM.NotWhoGrammar",    
+                  },
                   {
-                    //e.g. Adam Lambert is 42 years old
-                    guard: ({ event }) => event.nluValue.entities[0].text == "42 years old",
+                    //e.g. 42 years old
+                    guard: ({ event }) => event.nluValue.entities[0].text === "42 years old",
                     actions: [
                       ({ context, event }) => { context.age = event.nluValue.entities[0].text},
                     ],
@@ -441,7 +482,7 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
         initial: "notWhoGrammar",
         states: {
           notWhoGrammar: {
-            entry: [{type: "say", params:`Sorry, I didn't understand. What's your question?, please say Adam Lambert is 42 years old`}],
+            entry: [{type: "say", params:`Sorry, I didn't understand.  please say Adam Lambert is 42 years old`}],
             on: { 
               SPEAK_COMPLETE: "#DM.WhoisAdam"
               },
@@ -477,15 +518,20 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
                 RECOGNISED: 
                   [
                   {
+                      //e.g. Adam Lambert is born in Jan 29th
+                      guard: ({ event }) => whoIntent(event.nluValue.topIntent) ===false ,
+                      target: "#DM.NotAdamBirthDayGrammar",    
+                  },
+                  {
                     //e.g. Adam Lambert is born in Jan 29th
-                    guard: ({ event }) => event.nluValue.entities[0].text == "Jan 29th",
+                    guard: ({ event }) => whoIntent(event.nluValue.topIntent) === true ,
                     actions: [
                       ({ context, event }) => { context.birthday = event.nluValue.entities[0].text},
                     ],
                     target: "#DM.AdamInfo",    
                   },
                   {
-                    guard: ({ event }) => event.nluValue.topIntent == "help" ,
+                    guard: ({ event }) => event.nluValue.topIntent === "help" ,
                     target: "#DM.HelpAdamBirthDay",
                   },
                   "#DM.NotAdamBirthDayGrammar"
@@ -520,7 +566,7 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
         initial: "notAdamBirthDayGrammar",
         states: {
           notAdamBirthDayGrammar: {
-            entry: [{type: "say", params:`Sorry, I didn't understand. What's your question?, please say Adam Lambert is born in Jan 29th`}],
+            entry: [{type: "say", params:`Sorry, I didn't understand. please say Adam Lambert is born in Jan 29th`}],
             on: { 
               SPEAK_COMPLETE: "#DM.WhatAdamBirth"
               },
