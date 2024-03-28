@@ -27,15 +27,6 @@ Regarding improveingNLU coverage, I think I need to add more time datas and pers
     locale: "en-US",
     ttsDefaultVoice: "en-US-DavisNeural",
   };
-
-  // const meeting_name = {
-
-  //   meeting : "meeting",
-  //   departmentalmeeting : "departmental meeting",
-  //   "virtual meeting": "virtual meeting"
-
-
-  //  };
   const grammar_day = {
     monday: { day: "Monday" },
     tuesday: { day: "Tuesday" },
