@@ -1,12 +1,9 @@
-Welcome to LT2216/LT2816 V24 Dialogue systems 1 official repository.
+The course LT2216/LT2816 V24 Dialogue systems 1 official repository.
 
-Theory:
-- [[Lectures/js.org][Introduction to JavaScript]]
-
-Practice:
-- [[Exercises/javascript-exercises.md][Exercise 1]]
 - Lab I (see Canvas)
 - [[Labs/lab2.org][Lab II]]
 - [[Labs/lab3.org][Lab III]]
 - [[Labs/lab4.org][Lab IV]]
 - Lab V
+
+Implement the dialogue management using Azure.
