@@ -1,4 +1,4 @@
-The course LT2216/LT2816 V24 Dialogue systems 1 official repository.
+Fork from The course LT2216/LT2816 V24 Dialogue systems 1 official repository.
 
 - Lab I (see Canvas)
 - [[Labs/lab2.org][Lab II]]
@@ -9,22 +9,34 @@ The course LT2216/LT2816 V24 Dialogue systems 1 official repository.
 Implement the dialogue management using Azure.
 The coding files I implemented are in /Code/dm*.js
 
-Technicalities
-Development IDEA: Visual Studio Code
-Voice resources: Azure speech studio
-Implement the transcation between every work-state using state charts.
-HTML for the UI and Javascript for work-flow logic.
-Combine the ASR and TTS with Speechstate.
-Xstate as an inspector for making state transactions visual .
+Regarding Lab5 I implemented a Five2one Meditation Game.
+** Technicalities
+- Development IDEA: Visual Studio Code
+- Voice resources: Azure speech studio
+- Implement the transcation between every work-state using state charts.
+- HTML for the UI and Javascript for work-flow logic.
+- Combine the ASR and TTS with Speechstate.
+- Xstate as an inspector for making state transactions visual.
 
-Challenges
+** What does it do?
+- The 54321 method is a simple grounding technique often used to alleviate anxiety or stress by bringing attention back to the present moment. 
+- There are five missions for this game, every mission with one star. 
+- Users tell their stress level from 0 to 10 before and after playing this game.
+- Finally, finishing five missions will get five star. 
+- The stress level changes will be calculated.
+
+
+** Challenges
 How to update HTML element when the speechstate changes.
+
 Use ‘cond’ or ‘guard’ for condition judge.
-Solution_a:
+- Solution_a:
 entry: [{type: "say", params: `Let’s …. `}, displayCheckMessage, displayStar],
 Or actions: [{type: "say", params: `Let’s …. `}, displayCheckMessage]
 function displayCheckMessage() {
 document.getElementById('textContent').textContent = "Let's check whether …."}
-Solution_b:
+-  Solution_b:
 Use ‘guard’ instead of ‘cond’
+
+
 
