@@ -8,3 +8,23 @@ The course LT2216/LT2816 V24 Dialogue systems 1 official repository.
 
 Implement the dialogue management using Azure.
 The coding files I implemented are in /Code/dm*.js
+
+Technicalities
+Development IDEA: Visual Studio Code
+Voice resources: Azure speech studio
+Implement the transcation between every work-state using state charts.
+HTML for the UI and Javascript for work-flow logic.
+Combine the ASR and TTS with Speechstate.
+Xstate as an inspector for making state transactions visual .
+
+Challenges
+How to update HTML element when the speechstate changes.
+Use ‘cond’ or ‘guard’ for condition judge.
+Solution_a:
+entry: [{type: "say", params: `Let’s …. `}, displayCheckMessage, displayStar],
+Or actions: [{type: "say", params: `Let’s …. `}, displayCheckMessage]
+function displayCheckMessage() {
+document.getElementById('textContent').textContent = "Let's check whether …."}
+Solution_b:
+Use ‘guard’ instead of ‘cond’
+
